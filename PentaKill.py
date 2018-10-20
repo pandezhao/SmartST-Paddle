@@ -37,9 +37,10 @@ if __name__ == '__main__':
 
     while True:
 
-        current_state, location_information, mask = ENV.reset(plot=True)
+        current_state, _, mask = ENV.reset(plot=True)
 
-        current_state = np.stack([current_state, location_information[0], location_information[1]], axis=0)
+        # current_state = np.stack([current_state, location_information[0], location_information[1]], axis=0)
+        current_state = np.array(current_state)
 
         current_state_record = []
         next_state_record = []
@@ -69,7 +70,9 @@ if __name__ == '__main__':
                 else:
                     final_reward = f_r
 
-            next_state = np.stack([next_state, location_information[0], location_information[1]], axis=0)
+            # next_state = np.stack([next_state, location_information[0], location_information[1]], axis=0)
+
+            next_state = np.array(next_state)
 
             current_state_record.append(current_state)
             next_state_record.append(next_state)

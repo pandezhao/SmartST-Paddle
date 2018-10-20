@@ -55,11 +55,13 @@ class AC(object):
                                     fetch_list=[self.c_target])[0]
 
     def build_a(self, s):
-        a_conv1 = conv_bn_layer(main_input=s, ch_out=32, filter_size=3, stride=2, padding=1,name='a_conv1')
-        a_conv2 = conv_bn_layer(main_input=a_conv1, ch_out=32, filter_size=3, stride=2, padding=1,name='a_conv2')
+        a_conv1 = conv_bn_layer(main_input=s, ch_out=8, filter_size=3, stride=2, padding=1,name='a_conv1')
+        a_conv2 = conv_bn_layer(main_input=a_conv1, ch_out=16, filter_size=3, stride=2, padding=1,name='a_conv2')
         a_conv3 = conv_bn_layer(main_input=a_conv2, ch_out=32, filter_size=3, stride=1, padding=1,name='a_conv3')
         a_conv4 = conv_bn_layer(main_input=a_conv3, ch_out=32, filter_size=3, stride=1, padding=1,name='a_conv4')
         a_fc5 = fluid.layers.fc(input=a_conv4, size=50, act='relu',name='a_fc5')
+        a_fc5 = fluid.layers.fc(input=a_conv4, size=50, act='relu', name='a_fc5')
+        a_fc5 = fluid.layers.fc(input=a_conv4, size=50, act='relu', name='a_fc5')
         return fluid.layers.fc(input=a_fc5, size=self.A_DIM, act='softmax',name='a_out')
 
     def build_c(self, s):

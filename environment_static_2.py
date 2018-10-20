@@ -1,4 +1,5 @@
-import Tkinter as tk
+from __future__ import print_function
+import tkinter as tk
 import os
 import numpy as np
 from PIL import Image, ImageTk
@@ -96,17 +97,15 @@ class environment:
                              'downleft': np.array([1, -1]), 'left': np.array([0, -1]), 'leftup': np.array([-1, -1])}
 
         self.max_reward = 1
-        self.time_factor = 1
+        self.time_factor = 0.1
+        self.max_not_success = 30
+        self.success_counter = 0
 
-    def figure_location(self, location, width=5):
+    def figure_location(self, location, width = 5):
         tmp = np.zeros([self.map_size[0]+width*2, self.map_size[1]+width*2])
         cen1 = location[0] + width
         cen2 = location[1] + width
-        try:
-            tmp[cen1, cen2] = width * 10 + 10
-        except:
-            print("cen1:", cen1, "cen2:",cen2)
-            print("pass here")
+        tmp[cen1, cen2] = width * 10 + 10
         for i in range(1, 1+width):
             for j in range(0, i+1):
                 tmp[cen1 + j, cen2 + (i - j)] = (width - i) * 10 + 10
@@ -214,15 +213,17 @@ class environment:
             self.root.update()
         self.plot = plot
 
+        tmp_result = self.moveable_list()
+
         if self.digital:
             location_information = [self.current_loc, self.current_game_target]
+            return self.maps[self.map_index][0].copy(), location_information, tmp_result
         else:
             location_information = [self.figure_location(self.current_loc),
                                     self.figure_location(self.current_game_target)]
 
-        tmp_result = self.moveable_list()
-
-        return self.maps[self.map_index][0].copy(), location_information, tmp_result
+            concated = [self.maps[self.map_index][0].copy(), location_information[0], location_information[0]]
+            return concated, location_information, tmp_result
 
 
 
@@ -248,7 +249,13 @@ class environment:
         if reach_target and self.only_when_success:
             self.success_flag = True
 
-        if reach_target and not test:
+        if last_step and not reach_target:
+            self.success_counter += 1
+            if self.success_counter >= self.max_not_success:
+                self.success_counter = 0
+                self.success_flag = True
+
+        if (reach_target or last_step) and not test:
             final_R = self.final_reward()
             if self.running_reward:
                 running_final_R = np.array(self.maps[self.map_index][2][self.game_index, 0])
@@ -258,14 +265,22 @@ class environment:
             final_R = None
             running_final_R = None
 
-        if self.digital:
-            location_information = [self.current_loc, self.current_game_target]
-        else:
-            location_information = [self.figure_location(self.current_loc), self.figure_location(self.current_game_target)]
-
         tmp_result = self.moveable_list()
 
-        return np.array(self.maps[self.map_index][0]), location_information, tmp_result, -time_punish, reach_target, final_R, running_final_R
+        if self.digital:
+            location_information = [self.current_loc, self.current_game_target]
+            return np.array(self.maps[self.map_index][0]), location_information, tmp_result, -time_punish, \
+                   reach_target, final_R, running_final_R
+        else:
+            location_information = [self.figure_location(self.current_loc),
+                                    self.figure_location(self.current_game_target)]
+
+            return [np.array(self.maps[self.map_index][0]), location_information[0], location_information[1]], \
+                   location_information, tmp_result, -time_punish, reach_target, final_R, running_final_R
+
+
+
+
 
 
 
